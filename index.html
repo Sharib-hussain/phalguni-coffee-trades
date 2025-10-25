@@ -30,8 +30,18 @@
     .type{font-size:13px;color:var(--muted);letter-spacing:0.6px}
     .price{font-weight:800;font-size:34px;color:var(--accent)}
     .meta{font-size:13px;color:var(--muted)}
-  .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600;cursor:pointer;border:none}
-  .btn:disabled{opacity:.6;cursor:default}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600;cursor:pointer;border:none}
+    .btn:disabled{opacity:.6;cursor:default}
+    .btn.btn-secondary{background:var(--accent-2)}
+    .btn .icon{font-size:16px}
+    /* Copy success animation */
+    @keyframes copySuccess {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    .copy-success .icon{
+      animation: copySuccess 0.5s ease-in-out;
+    }
   /* loading state */
   .btn.loading{position:relative;padding-left:42px}
   .btn.loading::before{content:'';position:absolute;left:12px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:white;animation:spin 1s linear infinite}
@@ -88,8 +98,41 @@
       .price{font-size:38px}
       .card{padding:16px}
       footer{flex-direction:column;gap:8px;align-items:flex-start}
-      /* Floating refresh button for easy thumb access */
-      .fab{display:block;position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(107,66,38,.18);z-index:40}
+      /* Floating action buttons */
+      .fab{
+        display:flex;
+        position:fixed;
+        right:18px;
+        width:56px;
+        height:56px;
+        border-radius:50%;
+        color:#fff;
+        align-items:center;
+        justify-content:center;
+        border:none;
+        cursor:pointer;
+        z-index:40;
+        transition:transform 0.2s;
+      }
+      .fab:hover{
+        transform:scale(1.05);
+      }
+      .fab-primary{
+        bottom:18px;
+        background:var(--accent);
+        box-shadow:0 8px 20px rgba(107,66,38,.18);
+      }
+      .fab-secondary{
+        bottom:90px;
+        background:var(--accent-2);
+        box-shadow:0 8px 20px rgba(164,107,57,.18);
+      }
+      .fab.loading{
+        padding:0;
+      }
+      .fab.copy-success{
+        background:var(--green);
+      }
     }
     body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(107,66,38,.02) 0 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(107,66,38,.02) 0 3px, transparent 3px);pointer-events:none}
     table{width:100%;border-collapse:collapse;margin-top:18px}
@@ -106,7 +149,7 @@
         <h1>Phalguni Coffee Trades</h1>
         <p class="lead">Live buying prices (per kg) & 7-day history</p>
       </div>
-      <div style="margin-left:auto" class="controls">
+      <div style="margin-left:auto">
         <a id="refreshBtn" class="btn" href="#">Refresh</a>
       </div>
     </header>
@@ -163,8 +206,9 @@
     </footer>
   </div>
 
-  <!-- Floating action button for mobile refresh -->
-  <button id="fabRefresh" class="fab" title="Refresh" style="display:none">⟳</button>
+  <!-- Floating action buttons -->
+  <button id="fabRefresh" class="fab fab-primary" title="Refresh" style="display:none">⟳</button>
+  <button id="copyMsg" class="fab fab-secondary" title="Copy Price Message">📋</button>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -323,6 +367,48 @@
         throw err;
       }
     }
+
+    // Message copy functionality
+    const copyBtn = document.getElementById('copyMsg');
+    
+    function generatePriceMessage() {
+      const arabicaPrice = document.getElementById('arabicaPrice').textContent.trim();
+      const robustaPrice = document.getElementById('robustaPrice').textContent.trim();
+      const date = document.getElementById('arabicaTime').textContent.trim();
+      
+      return `Phalguni Coffee Trades
+
+Date: ${date}
+Arabica Raw Coffee: ${arabicaPrice}
+Robusta Raw Coffee: ${robustaPrice}
+
+Contact Details:
+Samanth B P: +91 8277446831
+Mohammed Sharib: +91 7022824289
+
+Location: Chickmagaluru
+Accepting raw coffee from Planters`;
+    }
+
+    copyBtn.addEventListener('click', async function() {
+      try {
+        const message = generatePriceMessage();
+        await navigator.clipboard.writeText(message);
+        
+        // Visual feedback
+        copyBtn.classList.add('copy-success');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="icon">✓</span> Copied!';
+        
+        setTimeout(() => {
+          copyBtn.classList.remove('copy-success');
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+        alert('Could not copy message. Please try again.');
+      }
+    });
 
     // Call the fetch on load but silence errors (UI already shows them)
     fetchPrices().catch(()=>{});
