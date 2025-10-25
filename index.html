@@ -21,7 +21,7 @@
     }
     html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg) 0%, #fff 100%);color:var(--accent-2)}
     .wrap{max-width:980px;margin:28px auto;padding:22px}
-    header{display:flex;align-items:center;gap:18px}
+    header{display:flex;align-items:center;gap:18px;justify-content:space-between}
     .logo{width:84px;height:84px;border-radius:14px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 8px 20px rgba(107,66,38,.12)}
     h1{margin:0;font-size:22px}
     p.lead{margin:6px 0 18px;color:var(--muted)}
@@ -90,11 +90,12 @@
       .wrap{padding:14px}
       .logo{width:64px;height:64px}
       /* Mobile header layout */
-      header{flex-direction:column;align-items:flex-start;gap:12px}
-      header > div:nth-child(2){order:2}
-      .controls{order:3;width:100%;display:flex;justify-content:space-between}
-      .controls .btn{flex:0 0 auto}
-      .logo{order:1}
+      header{align-items:center;gap:12px;flex-wrap:wrap}
+      header > div:nth-child(2){
+        flex:1;
+        min-width:200px;
+        text-align:center;
+      }
       .price{font-size:38px}
       .card{padding:16px}
       footer{flex-direction:column;gap:8px;align-items:flex-start}
