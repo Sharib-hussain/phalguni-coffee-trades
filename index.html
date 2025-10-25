@@ -25,17 +25,37 @@
     .logo{width:84px;height:84px;border-radius:14px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 8px 20px rgba(107,66,38,.12)}
     h1{margin:0;font-size:22px}
     p.lead{margin:6px 0 18px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
     .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 10px 30px rgba(98,68,44,.06);min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
     .type{font-size:13px;color:var(--muted);letter-spacing:0.6px}
     .price{font-weight:800;font-size:34px;color:var(--accent)}
     .meta{font-size:13px;color:var(--muted)}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600;cursor:pointer;border:none}
+  .btn:disabled{opacity:.6;cursor:default}
+  /* loading state */
+  .btn.loading{position:relative;padding-left:42px}
+  .btn.loading::before{content:'';position:absolute;left:12px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:white;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
     .controls{display:flex;gap:12px;align-items:center}
     footer{margin-top:26px;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(85,122,70,0.05),transparent);color:var(--muted);display:flex;justify-content:space-between;align-items:center}
     .small{font-size:13px}
     .contact{font-weight:700;color:var(--accent-2)}
-    @media (max-width:720px){.grid{grid-template-columns:1fr}.wrap{padding:14px}.logo{width:64px;height:64px}}
+    @media (max-width:720px){
+      .grid{grid-template-columns:1fr}
+      .wrap{padding:14px}
+      .logo{width:64px;height:64px}
+      /* Mobile header layout */
+      header{flex-direction:column;align-items:flex-start;gap:12px}
+      header > div:nth-child(2){order:2}
+      .controls{order:3;width:100%;display:flex;justify-content:space-between}
+      .controls .btn{flex:0 0 auto}
+      .logo{order:1}
+      .price{font-size:38px}
+      .card{padding:16px}
+      footer{flex-direction:column;gap:8px;align-items:flex-start}
+      /* Floating refresh button for easy thumb access */
+      .fab{display:block;position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(107,66,38,.18);z-index:40}
+    }
     body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(107,66,38,.02) 0 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(107,66,38,.02) 0 3px, transparent 3px);pointer-events:none}
     table{width:100%;border-collapse:collapse;margin-top:18px}
     table th, table td{border:1px solid #ddd;padding:8px;text-align:center}
@@ -93,6 +113,7 @@
         <div class="card" style="width:260px;display:flex;flex-direction:column;justify-content:center;gap:8px">
           <div class="small">Your contact</div>
           <div class="contact">Samanth B P· +91 8277446831</div>
+          <div class="contact">Mohammed Sharib· +91 7022824289</div>
           <div class="meta">Location: Chickmagaluru · Accepting raw coffee from Planters</div>
         </div>
       </div>
@@ -103,6 +124,9 @@
       <div class="small">Made with care · Phalguni Coffee Trades</div>
     </footer>
   </div>
+
+  <!-- Floating action button for mobile refresh -->
+  <button id="fabRefresh" class="fab" title="Refresh" style="display:none">⟳</button>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -147,6 +171,7 @@
         document.getElementById('marketRef').textContent = `Error: ${err.message}. Make sure the Google Sheet has columns: type, price, updatedat, date, arabica, robusta`;
         document.getElementById('arabicaPrice').textContent = '—';
         document.getElementById('robustaPrice').textContent = '—';
+        throw err; // rethrow so callers (refresh button) can react
       }
     }
 
@@ -191,12 +216,80 @@
       document.getElementById('marketRef').textContent = 'No data source configured. Follow the instructions in the page comments to link a Google Sheet.';
     }
 
-    document.getElementById('refreshBtn').addEventListener('click', function(e){
-      e.preventDefault();
-      fetchPrices();
-    });
+    // Button helpers
+    const refreshBtn = document.getElementById('refreshBtn');
+    const fabRefresh = document.getElementById('fabRefresh');
 
-    fetchPrices();
+    function setButtonLoading(el, isLoading){
+      if(!el) return;
+      if(isLoading){
+        el.classList.add('loading');
+        el.disabled = true;
+        el.dataset.orig = el.textContent;
+        el.textContent = 'Loading…';
+      } else {
+        el.classList.remove('loading');
+        el.disabled = false;
+        if(el.dataset.orig) el.textContent = el.dataset.orig;
+      }
+    }
+
+    function setButtonText(el, text){ if(el) el.textContent = text; }
+
+    // Wrapper that shows loading state and calls fetchPrices
+    async function handleRefreshClick(e){
+      e && e.preventDefault();
+      // Shift/Ctrl click => hard reload
+      if(e && (e.shiftKey || e.ctrlKey)){
+        window.location.reload();
+        return;
+      }
+      setButtonLoading(refreshBtn, true);
+      setButtonLoading(fabRefresh, true);
+      try{
+        await fetchPrices();
+        setButtonText(refreshBtn, 'Updated');
+        setButtonText(fabRefresh, '✓');
+        await new Promise(r=>setTimeout(r,1200));
+      }catch(err){
+        setButtonText(refreshBtn, 'Error');
+        setButtonText(fabRefresh, '⚠');
+        console.error('Refresh failed:', err);
+        await new Promise(r=>setTimeout(r,1500));
+      } finally{
+        setButtonLoading(refreshBtn, false);
+        setButtonLoading(fabRefresh, false);
+        setButtonText(refreshBtn, 'Refresh');
+        setButtonText(fabRefresh, '⟳');
+      }
+    }
+
+    refreshBtn.addEventListener('click', handleRefreshClick);
+    fabRefresh.addEventListener('click', handleRefreshClick);
+
+    // Show/hide fab on small screens
+    function updateFabVisibility(){
+      if(window.matchMedia && window.matchMedia('(max-width:720px)').matches){
+        fabRefresh.style.display = 'flex';
+      } else {
+        fabRefresh.style.display = 'none';
+      }
+    }
+    window.addEventListener('resize', updateFabVisibility);
+    updateFabVisibility();
+
+    // Make fetchPrices rethrow so wrapper can react to errors
+    const originalFetchPrices = fetchPrices;
+    async function fetchPricesWrapper(){
+      try{
+        await originalFetchPrices();
+      }catch(err){
+        throw err;
+      }
+    }
+
+    // Call the fetch on load but silence errors (UI already shows them)
+    fetchPrices().catch(()=>{});
   </script>
 </body>
 </html>
