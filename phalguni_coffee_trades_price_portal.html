@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Phalguni Coffee Trades — Today's Buying Price & History</title>
+  <meta name="description" content="Daily buying prices (per kg) for Arabica & Robusta with 7-day history. Updated by Phalguni Coffee Trades." />
+  <style>
+    :root{
+      --bg:#f7f2ec;
+      --card:#fff;
+      --accent:#6b4226;
+      --accent-2:#a46b39;
+      --muted:#7b6b61;
+      --green:#557a46;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg) 0%, #fff 100%);color:var(--accent-2)}
+    .wrap{max-width:980px;margin:28px auto;padding:22px}
+    header{display:flex;align-items:center;gap:18px}
+    .logo{width:84px;height:84px;border-radius:14px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 8px 20px rgba(107,66,38,.12)}
+    h1{margin:0;font-size:22px}
+    p.lead{margin:6px 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 10px 30px rgba(98,68,44,.06);min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
+    .type{font-size:13px;color:var(--muted);letter-spacing:0.6px}
+    .price{font-weight:800;font-size:34px;color:var(--accent)}
+    .meta{font-size:13px;color:var(--muted)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;text-decoration:none;font-weight:600}
+    .controls{display:flex;gap:12px;align-items:center}
+    footer{margin-top:26px;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(85,122,70,0.05),transparent);color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+    .small{font-size:13px}
+    .contact{font-weight:700;color:var(--accent-2)}
+    @media (max-width:720px){.grid{grid-template-columns:1fr}.wrap{padding:14px}.logo{width:64px;height:64px}}
+    body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(107,66,38,.02) 0 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(107,66,38,.02) 0 3px, transparent 3px);pointer-events:none}
+    table{width:100%;border-collapse:collapse;margin-top:18px}
+    table th, table td{border:1px solid #ddd;padding:8px;text-align:center}
+    table th{background-color:var(--accent-2);color:white}
+    canvas{margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">PC</div>
+      <div>
+        <h1>Phalguni Coffee Trades</h1>
+        <p class="lead">Live buying prices (per kg) & 7-day history</p>
+      </div>
+      <div style="margin-left:auto" class="controls">
+        <a id="refreshBtn" class="btn" href="#">Refresh</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="grid">
+        <div class="card" id="arabicaCard">
+          <div>
+            <div class="type">Arabica — Raw / Green (per kg)</div>
+            <div class="price" id="arabicaPrice">—</div>
+          </div>
+          <div class="meta">Last updated: <span id="arabicaTime">—</span></div>
+        </div>
+
+        <div class="card" id="robustaCard">
+          <div>
+            <div class="type">Robusta — Raw / Green (per kg)</div>
+            <div class="price" id="robustaPrice">—</div>
+          </div>
+          <div class="meta">Last updated: <span id="robustaTime">—</span></div>
+        </div>
+      </div>
+
+      <h2>Price History (Past 7 Days)</h2>
+      <table id="historyTable">
+        <thead>
+          <tr><th>Date</th><th>Arabica (₹/kg)</th><th>Robusta (₹/kg)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <canvas id="historyChart" height="150"></canvas>
+
+      <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <div class="card" style="flex:1;min-height:70px">
+          <div class="small">Market reference (optional)</div>
+          <div class="meta" id="marketRef">ICE / Coffee Board values will appear here if configured.</div>
+        </div>
+
+        <div class="card" style="width:260px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+          <div class="small">Your contact</div>
+          <div class="contact">Phalguni Coffee Trades · +91 98XXXXXXXX</div>
+          <div class="meta">Location: Karnataka · Accepting raw coffee from farmers</div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="small">Prices are per kg. For bulk orders please call.</div>
+      <div class="small">Made with care · Phalguni Coffee Trades</div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const SHEET_CSV_URL = "REPLACE_WITH_YOUR_GOOGLE_SHEET_CSV_URL";
+    const priceMap = { Arabica: {priceEl: 'arabicaPrice', timeEl: 'arabicaTime'}, Robusta: {priceEl: 'robustaPrice', timeEl: 'robustaTime'} };
+
+    async function fetchPrices(){
+      try{
+        if(!SHEET_CSV_URL || SHEET_CSV_URL.includes('REPLACE_WITH')){
+          showPlaceholder();
+          return;
+        }
+        const resp = await fetch(SHEET_CSV_URL, {cache: 'no-store'});
+        if(!resp.ok) throw new Error('Failed to fetch sheet');
+        const csv = await resp.text();
+        const rows = csv.trim().split('\n').map(r=>r.split(','));
+        const header = rows[0].map(h=>h.trim().toLowerCase());
+        const dataRows = rows.slice(-7); // last 7 rows for history
+
+        const historyData = [];
+        dataRows.forEach(r=>{
+          const obj = {};
+          r.forEach((cell,i)=> obj[header[i]] = cell && cell.trim());
+          if(obj.type && (obj.type==='Arabica' || obj.type==='Robusta')){
+            updateUI(obj.type,obj.price,obj.updatedat);
+          }
+          if(obj.date){
+            historyData.push({date: obj.date, arabica: obj.arabica, robusta: obj.robusta});
+          }
+        });
+        updateHistory(historyData);
+      }catch(err){
+        console.error(err);
+        document.getElementById('marketRef').textContent = 'Error loading sheet — check the SHEET_CSV_URL.';
+      }
+    }
+
+    function updateUI(type, price, updatedAt){
+      const mapping = priceMap[type];
+      if(!mapping) return;
+      document.getElementById(mapping.priceEl).textContent = '₹ ' + Number(price).toLocaleString('en-IN');
+      document.getElementById(mapping.timeEl).textContent = updatedAt;
+    }
+
+    function updateHistory(data){
+      const tbody = document.querySelector('#historyTable tbody');
+      tbody.innerHTML = '';
+      const labels = [], arabicaArr = [], robustaArr = [];
+      data.forEach(d=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.date}</td><td>₹ ${d.arabica}</td><td>₹ ${d.robusta}</td>`;
+        tbody.appendChild(tr);
+        labels.push(d.date);
+        arabicaArr.push(Number(d.arabica));
+        robustaArr.push(Number(d.robusta));
+      });
+      // chart
+      const ctx = document.getElementById('historyChart').getContext('2d');
+      if(window.priceChart) window.priceChart.destroy();
+      window.priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {label:'Arabica', data: arabicaArr, borderColor:'#6b4226', backgroundColor:'rgba(107,66,38,0.2)', tension:0.3},
+            {label:'Robusta', data: robustaArr, borderColor:'#557a46', backgroundColor:'rgba(85,122,70,0.2)', tension:0.3}
+          ]
+        },
+        options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:false}}}
+      });
+    }
+
+    function showPlaceholder(){
+      document.getElementById('arabicaPrice').textContent = '—';
+      document.getElementById('robustaPrice').textContent = '—';
+      document.getElementById('marketRef').textContent = 'No data source configured. Follow the instructions in the page comments to link a Google Sheet.';
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', function(e){
+      e.preventDefault();
+      fetchPrices();
+    });
+
+    fetchPrices();
+  </script>
+</body>
+</html>
