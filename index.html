@@ -313,7 +313,10 @@
       const tbody = document.querySelector('#historyTable tbody');
       tbody.innerHTML = '';
       const labels = [], arabicaArr = [], robustaArr = [];
-      data.forEach(d=>{
+      // Reverse the data array to show older dates first (left to right)
+      const reversedData = [...data].reverse();
+      
+      reversedData.forEach(d=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${d.date}</td><td>₹ ${d.arabica}</td><td>₹ ${d.robusta}</td>`;
         tbody.appendChild(tr);
