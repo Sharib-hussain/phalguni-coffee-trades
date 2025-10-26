@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phalguni Coffee Trades - Admin</title>
+    <style>
+        :root {
+            --bg:#f7f2ec;
+            --card:#fff;
+            --accent:#6b4226;
+            --accent-2:#a46b39;
+            --muted:#7b6b61;
+            --green:#557a46;
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(180deg,var(--bg) 0%, #fff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(98,68,44,.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-form {
+            display: none;
+        }
+        .price-form {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        h1 {
+            color: var(--accent);
+            text-align: center;
+            margin: 0 0 24px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            color: var(--accent-2);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 16px;
+            text-align: center;
+        }
+        .success {
+            color: var(--green);
+            margin-top: 16px;
+            text-align: center;
+        }
+        .logout {
+            text-align: center;
+            margin-top: 16px;
+        }
+        .logout button {
+            background: var(--accent-2);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <div id="loginForm" class="login-form active">
+            <h1>Admin Login</h1>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button onclick="handleLogin()">Login</button>
+            <div id="loginError" class="error"></div>
+        </div>
+
+        <div id="priceForm" class="price-form">
+            <h1>Update Prices</h1>
+            <div class="form-group">
+                <label for="arabicaPrice">Arabica Price (₹/kg)</label>
+                <input type="number" id="arabicaPrice" required>
+            </div>
+            <div class="form-group">
+                <label for="robustaPrice">Robusta Price (₹/kg)</label>
+                <input type="number" id="robustaPrice" required>
+            </div>
+            <button onclick="handlePriceUpdate()">Update Prices</button>
+            <div id="updateStatus" class="success"></div>
+            <div class="logout">
+                <button onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Google API client
+        function initClient() {
+            gapi.client.init({
+                apiKey: 'YOUR_API_KEY',
+                clientId: 'YOUR_CLIENT_ID',
+                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+                scope: "https://www.googleapis.com/auth/spreadsheets"
+            }).then(function() {
+                // Listen for sign-in state changes
+                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+                // Handle the initial sign-in state
+                updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+            });
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            // This is a basic example - in production, use proper authentication
+            if (username === "admin" && password === "phalguni2023") {
+                document.getElementById('loginForm').classList.remove('active');
+                document.getElementById('priceForm').classList.add('active');
+                localStorage.setItem('adminLoggedIn', 'true');
+            } else {
+                errorDiv.textContent = "Invalid credentials";
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('priceForm').classList.remove('active');
+            localStorage.removeItem('adminLoggedIn');
+        }
+
+        async function handlePriceUpdate() {
+            const arabicaPrice = document.getElementById('arabicaPrice').value;
+            const robustaPrice = document.getElementById('robustaPrice').value;
+            const statusDiv = document.getElementById('updateStatus');
+
+            if (!arabicaPrice || !robustaPrice) {
+                statusDiv.textContent = "Please enter both prices";
+                statusDiv.className = "error";
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/update-prices', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        arabicaPrice: Number(arabicaPrice),
+                        robustaPrice: Number(robustaPrice)
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.textContent = "Prices updated successfully!";
+                    statusDiv.className = "success";
+                    // Clear the form
+                    document.getElementById('arabicaPrice').value = '';
+                    document.getElementById('robustaPrice').value = '';
+                } else {
+                    throw new Error(data.error || 'Failed to update prices');
+                }
+            } catch (error) {
+                statusDiv.textContent = "Failed to update prices: " + error.message;
+                statusDiv.className = "error";
+            }
+        }
+
+        // Check login status on page load
+        window.onload = function() {
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (isLoggedIn) {
+                document.getElementById('loginForm').classList.remove('active');
+                document.getElementById('priceForm').classList.add('active');
+            }
+        };
+    </script>
+</body>
+</html>
