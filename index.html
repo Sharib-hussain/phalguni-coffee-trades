@@ -178,6 +178,29 @@
         background:var(--green);
       }
     }
+    /* Notification banner styles */
+    @keyframes scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    .notification-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: white;
+      padding: 8px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(107,66,38,0.15);
+    }
+    .notification-text {
+      display: inline-block;
+      animation: scroll 20s linear infinite;
+      padding-right: 50px;
+    }
     body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(107,66,38,.02) 0 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(107,66,38,.02) 0 3px, transparent 3px);pointer-events:none}
     table{width:100%;border-collapse:collapse;margin-top:18px}
     table th, table td{border:1px solid #ddd;padding:8px;text-align:center}
@@ -186,7 +209,10 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="notification-banner">
+    <div class="notification-text">⚠️ Important: These rates are applicable for coffee with 90% or more fruities. Rates may vary for coffee with less than 90% fruities. ⚠️</div>
+  </div>
+  <div class="wrap" style="margin-top: 50px">
     <header>
       <div class="header-top">
         <div class="logo">PC</div>
