@@ -180,7 +180,7 @@
     }
     /* Notification banner styles */
     @keyframes scroll {
-      0% { transform: translateX(100%); }
+      0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
     .notification-banner {
@@ -200,6 +200,7 @@
       display: inline-block;
       animation: scroll 20s linear infinite;
       padding-right: 50px;
+      transform: translateX(0);
     }
     body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(107,66,38,.02) 0 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(107,66,38,.02) 0 3px, transparent 3px);pointer-events:none}
     table{width:100%;border-collapse:collapse;margin-top:18px}
