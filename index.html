@@ -226,7 +226,8 @@
     <header>
       <div class="header-top">
         <div class="logo">PC</div>
-        <div>
+        <div style="display: flex; gap: 10px;">
+          <button id="langBtn" class="btn btn-secondary">ಕನ್ನಡ</button>
           <a id="refreshBtn" class="btn" href="#">Refresh</a>
         </div>
       </div>
@@ -302,6 +303,53 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // Language translations
+    const translations = {
+      en: {
+        refresh: 'Refresh',
+        updated: 'Updated',
+        loading: 'Loading…',
+        title: 'Phalguni Coffee Trades',
+        subtitle: 'Live buying prices (per kg) & 7-day history',
+        arabicaType: 'Arabica — Raw / Green (per kg)',
+        robustaType: 'Robusta — Raw / Green (per kg)',
+        arecanutType: 'Arecanut — Raw (per kg)',
+        lastUpdated: 'Last updated:',
+        priceHistory: 'Price History (Past 7 Days)',
+        date: 'Date',
+        pricePerKg: '(₹/kg)',
+        contact: 'Please Contact',
+        location: 'Location: Chickmagaluru · Accepting raw coffee from Planters',
+        footer1: 'Prices are per kg. For bulk orders please call.',
+        footer2: 'Made with care · Phalguni Coffee Trades',
+        notification: '⚠️ Important: These rates are applicable for coffee with 90% or more fruits. Rates may vary for coffee with less than 90% fruits. ⚠️',
+        switchToKannada: 'ಕನ್ನಡ',
+        switchToEnglish: 'English'
+      },
+      kn: {
+        refresh: 'ರಿಫ್ರೆಶ್',
+        updated: 'ಅಪ್ಡೇಟ್ ಆಗಿದೆ',
+        loading: 'ಲೋಡ್ ಆಗುತ್ತಿದೆ…',
+        title: 'ಫಾಲ್ಗುಣಿ ಕಾಫಿ ಟ್ರೇಡ್ಸ್',
+        subtitle: 'ಪ್ರಸ್ತುತ ಖರೀದಿ ದರಗಳು (ಪ್ರತಿ ಕೆಜಿ) & 7 ದಿನಗಳ ಇತಿಹಾಸ',
+        arabicaType: 'ಅರೇಬಿಕಾ — ಕಚ್ಚಾ / ಹಸಿರು (ಪ್ರತಿ ಕೆಜಿ)',
+        robustaType: 'ರೊಬುಸ್ತಾ — ಕಚ್ಚಾ / ಹಸಿರು (ಪ್ರತಿ ಕೆಜಿ)',
+        arecanutType: 'ಅಡಿಕೆ — ಕಚ್ಚಾ (ಪ್ರತಿ ಕೆಜಿ)',
+        lastUpdated: 'ಕೊನೆಯ ಅಪ್ಡೇಟ್:',
+        priceHistory: 'ದರ ಇತಿಹಾಸ (ಕಳೆದ 7 ದಿನಗಳು)',
+        date: 'ದಿನಾಂಕ',
+        pricePerKg: '(₹/ಕೆಜಿ)',
+        contact: 'ಸಂಪರ್ಕಿಸಿ',
+        location: 'ಸ್ಥಳ: ಚಿಕ್ಕಮಗಳೂರು · ರೈತರಿಂದ ಕಚ್ಚಾ ಕಾಫಿ ಸ್ವೀಕರಿಸಲಾಗುತ್ತದೆ',
+        footer1: 'ಬೆಲೆಗಳು ಪ್ರತಿ ಕೆಜಿಗೆ. ಬಲ್ಕ್ ಆರ್ಡರ್‌ಗಳಿಗೆ ದಯವಿಟ್ಟು ಕರೆ ಮಾಡಿ.',
+        footer2: 'ಕಾಳಜಿಯಿಂದ ತಯಾರಿಸಲಾಗಿದೆ · ಫಾಲ್ಗುಣಿ ಕಾಫಿ ಟ್ರೇಡ್ಸ್',
+        notification: '⚠️ ಮುಖ್ಯ: ಈ ದರಗಳು 90% ಅಥವಾ ಹೆಚ್ಚು ಹಣ್ಣುಗಳನ್ನು ಹೊಂದಿರುವ ಕಾಫಿಗೆ ಅನ್ವಯಿಸುತ್ತವೆ. 90% ಕ್ಕಿಂತ ಕಡಿಮೆ ಹಣ್ಣುಗಳನ್ನು ಹೊಂದಿರುವ ಕಾಫಿಗೆ ದರಗಳು ಬದಲಾಗಬಹುದು. ⚠️',
+        switchToKannada: 'ಕನ್ನಡ',
+        switchToEnglish: 'English'
+      }
+    };
+
+    let currentLang = 'en'; // Default language
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9DnNnxDj2n3Fy9-JVnnouxDoZ_VZ9au3wRXNO_s0CYLED7mGHPfpolUAhNCpNyeAvMJYD7kGXBl_K/pub?gid=0&single=true&output=csv";
     const priceMap = { 
       Arabica: {priceEl: 'arabicaPrice', timeEl: 'arabicaTime'}, 
@@ -479,8 +527,10 @@
       const robustaPrice = document.getElementById('robustaPrice').textContent.trim();
       const arecanutPrice = document.getElementById('arecanutPrice').textContent.trim();
       const date = document.getElementById('arabicaTime').textContent.trim();
+      const t = translations[currentLang];
       
-      return `Phalguni Coffee Trades
+      return currentLang === 'en' ? 
+        `Phalguni Coffee Trades
 
 Date: ${date}
 Arabica Raw Coffee: ${arabicaPrice}
@@ -495,7 +545,23 @@ Samanth B P: +91 8277446831
 Mohammed Sharib: +91 7022824289
 
 Location: Chickmagaluru
-Accepting raw coffee from Planters`;
+Accepting raw coffee from Planters` :
+        `ಫಲ್ಗುಣಿ ಕಾಫಿ ಟ್ರೇಡ್ಸ್
+
+ದಿನಾಂಕ: ${date}
+ಅರೇಬಿಕಾ ಕಚ್ಚಾ ಕಾಫಿ: ${arabicaPrice}
+ರೊಬುಸ್ತಾ ಕಚ್ಚಾ ಕಾಫಿ: ${robustaPrice}
+ಅಡಿಕೆ ಕಚ್ಚಾ: ${arecanutPrice}
+
+⚠️ ಗಮನಿಸಿ: ಈ ದರಗಳು 90% ಅಥವಾ ಹೆಚ್ಚು ಹಣ್ಣುಗಳನ್ನು ಹೊಂದಿರುವ ಕಾಫಿಗೆ ಅನ್ವಯಿಸುತ್ತವೆ.
+90% ಕ್ಕಿಂತ ಕಡಿಮೆ ಹಣ್ಣುಗಳನ್ನು ಹೊಂದಿರುವ ಕಾಫಿಗೆ ದರಗಳು ಬದಲಾಗಬಹುದು.
+
+ಸಂಪರ್ಕ ವಿವರಗಳು:
+ಸಾಮಂತ್ ಬಿ ಪಿ: +91 8277446831
+ಮೊಹಮ್ಮದ್ ಷರೀಬ್: +91 7022824289
+
+ಸ್ಥಳ: ಚಿಕ್ಕಮಗಳೂರು
+ರೈತರಿಂದ ಕಚ್ಚಾ ಕಾಫಿ ಸ್ವೀಕರಿಸಲಾಗುತ್ತದೆ`;
     }
 
     copyBtn.addEventListener('click', async function() {
@@ -517,6 +583,71 @@ Accepting raw coffee from Planters`;
         alert('Could not copy message. Please try again.');
       }
     });
+
+    // Language switching functionality
+    function updateLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      
+      // Update all text content
+      document.querySelector('h1').textContent = t.title;
+      document.querySelector('p.lead').textContent = t.subtitle;
+      document.querySelector('#refreshBtn').textContent = t.refresh;
+      document.querySelector('#langBtn').textContent = lang === 'en' ? t.switchToKannada : t.switchToEnglish;
+      
+      // Update notification
+      document.querySelector('.notification-text').textContent = t.notification;
+      
+      // Update card types
+      document.querySelector('#arabicaCard .type').textContent = t.arabicaType;
+      document.querySelector('#robustaCard .type').textContent = t.robustaType;
+      document.querySelector('#arecanutCard .type').textContent = t.arecanutType;
+      
+      // Update meta labels
+      document.querySelectorAll('.meta').forEach(meta => {
+        if (meta.textContent.includes('Last updated')) {
+          const date = meta.querySelector('span').textContent;
+          meta.innerHTML = `${t.lastUpdated} <span>${date}</span>`;
+        }
+      });
+      
+      // Update history section
+      document.querySelector('h2').textContent = t.priceHistory;
+      const tableHeaders = document.querySelector('#historyTable thead tr').cells;
+      tableHeaders[0].textContent = t.date;
+      tableHeaders[1].textContent = `Arabica ${t.pricePerKg}`;
+      tableHeaders[2].textContent = `Robusta ${t.pricePerKg}`;
+      tableHeaders[3].textContent = `Arecanut ${t.pricePerKg}`;
+      
+      // Update contact section
+      document.querySelector('.contact-header').textContent = t.contact;
+      document.querySelector('.location').textContent = t.location;
+      
+      // Update footer
+      document.querySelectorAll('.small')[0].textContent = t.footer1;
+      document.querySelectorAll('.small')[1].textContent = t.footer2;
+
+      // Update chart labels if it exists
+      if (window.priceChart) {
+        window.priceChart.data.datasets[0].label = 'Arabica';
+        window.priceChart.data.datasets[1].label = 'Robusta';
+        window.priceChart.data.datasets[2].label = 'Arecanut';
+        window.priceChart.update();
+      }
+
+      // Store language preference
+      localStorage.setItem('preferred-language', lang);
+    }
+
+    // Language button click handler
+    document.getElementById('langBtn').addEventListener('click', function() {
+      const newLang = currentLang === 'en' ? 'kn' : 'en';
+      updateLanguage(newLang);
+    });
+
+    // Initialize with stored language preference or default to English
+    const storedLang = localStorage.getItem('preferred-language') || 'en';
+    updateLanguage(storedLang);
 
     // Call the fetch on load but silence errors (UI already shows them)
     fetchPrices().catch(()=>{});
