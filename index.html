@@ -227,6 +227,9 @@
     <header>
       <div class="header-top">
         <div class="logo">PC</div>
+        <div class="controls">
+          <button id="langToggle" class="btn btn-secondary">🇮🇳 ಕನ್ನಡ</button>
+        </div>
         <div>
           <a id="refreshBtn" class="btn" href="#">Refresh</a>
         </div>
@@ -300,6 +303,69 @@
   <!-- Floating action buttons -->
   <button id="fabRefresh" class="fab fab-primary" title="Refresh" style="display:none">⟳</button>
   <button id="copyMsg" class="fab fab-secondary" title="Copy Price Message">📋</button>
+  <script>
+  // === Bilingual Text Data ===
+  const translations = {
+    en: {
+      title: "Phalguni Coffee Trades",
+      subtitle: "Live buying prices (per kg) & 7-day history",
+      arabica: "Arabica — Raw / Green (per kg)",
+      robusta: "Robusta — Raw / Green (per kg)",
+      arecanut: "Arecanut — Raw (per kg)",
+      historyTitle: "Price History (Past 7 Days)",
+      contactHeader: "Please Contact",
+      location: "Location: Chickmagaluru · Accepting raw coffee from planters",
+      note: "⚠️ Important: These rates apply for coffee with 90% or more fruits. Rates may vary for coffee with less than 90% fruits.",
+      footer1: "Prices are per kg. For bulk orders please call.",
+      footer2: "Made with care · Phalguni Coffee Trades"
+    },
+    kn: {
+      title: "ಫಾಲ್ಗುಣಿ ಕಾಫಿ ಟ್ರೇಡ್ಸ್",
+      subtitle: "ದಿನನಿತ್ಯದ ಖರೀದಿ ಬೆಲೆಗಳು (ಪ್ರತಿ ಕೆ.ಜಿ) ಮತ್ತು 7 ದಿನಗಳ ಇತಿಹಾಸ",
+      arabica: "ಅರೇಬಿಕಾ — ಕಚ್ಚಾ / ಹಸಿರು (ಪ್ರತಿ ಕೆ.ಜಿ)",
+      robusta: "ರೋಬಸ್ಟಾ — ಕಚ್ಚಾ / ಹಸಿರು (ಪ್ರತಿ ಕೆ.ಜಿ)",
+      arecanut: "ಅಡಿಕೆ — ಕಚ್ಚಾ (ಪ್ರತಿ ಕೆ.ಜಿ)",
+      historyTitle: "ಬೆಲೆಯ ಇತಿಹಾಸ (ಕಳೆದ 7 ದಿನಗಳು)",
+      contactHeader: "ದಯವಿಟ್ಟು ಸಂಪರ್ಕಿಸಿ",
+      location: "ಸ್ಥಳ: ಚಿಕ್ಕಮಗಳೂರು · ಬೆಳೆಗಾರರಿಂದ ಕಚ್ಚಾ ಕಾಫಿ ಸ್ವೀಕರಿಸಲಾಗುತ್ತದೆ",
+      note: "⚠️ ಗಮನಿಸಿ: ಈ ದರಗಳು 90% ಅಥವಾ ಹೆಚ್ಚು ಹಣ್ಣುಗಳಿರುವ ಕಾಫಿಗೆ ಅನ್ವಯಿಸುತ್ತವೆ. 90% ಕ್ಕಿಂತ ಕಡಿಮೆ ಹಣ್ಣುಗಳಿದ್ದರೆ ದರಗಳು ಬದಲಾಗಬಹುದು.",
+      footer1: "ಬೆಲೆಗಳು ಪ್ರತಿ ಕೆ.ಜಿ ಗೆ. ದೊಡ್ಡ ಪ್ರಮಾಣದ ಖರೀದಿಗೆ ದಯವಿಟ್ಟು ಕರೆ ಮಾಡಿ.",
+      footer2: "ಪ್ರೀತಿಯಿಂದ ತಯಾರಿಸಿದದು · ಫಾಲ್ಗುಣಿ ಕಾಫಿ ಟ್ರೇಡ್ಸ್"
+    }
+  };
+
+  let currentLang = "en";
+
+  // === Function to swap text ===
+  function setLanguage(lang) {
+    const t = translations[lang];
+    document.querySelector("h1").textContent = t.title;
+    document.querySelector(".lead").textContent = t.subtitle;
+    document.querySelector("#arabicaCard .type").textContent = t.arabica;
+    document.querySelector("#robustaCard .type").textContent = t.robusta;
+    document.querySelector("#arecanutCard .type").textContent = t.arecanut;
+    document.querySelector("main h2").textContent = t.historyTitle;
+    document.querySelector(".contact-header").textContent = t.contactHeader;
+    document.querySelector(".location").textContent = t.location;
+    document.querySelector(".notification-text").textContent = t.note;
+    document.querySelector("footer div:nth-child(1)").textContent = t.footer1;
+    document.querySelector("footer div:nth-child(2)").textContent = t.footer2;
+
+    // Toggle button text
+    const btn = document.getElementById("langToggle");
+    btn.textContent = lang === "en" ? "🇮🇳 ಕನ್ನಡ" : "🇬🇧 English";
+    currentLang = lang;
+  }
+
+  // === Handle button click ===
+  document.getElementById("langToggle").addEventListener("click", () => {
+    setLanguage(currentLang === "en" ? "kn" : "en");
+  });
+
+  // === Optional: auto-detect browser language ===
+  const userLang = navigator.language.startsWith("kn") ? "kn" : "en";
+  setLanguage(userLang);
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
