@@ -382,6 +382,9 @@ Mudigere | Chickmagaluru | Belur | Sakaleshpura·`
     document.querySelector("footer div:nth-child(1)").textContent = t.footer1;
     document.querySelector("footer div:nth-child(2)").textContent = t.footer2;
 
+    // ✅ Update <html lang="">
+    document.documentElement.lang = lang;
+
     // Button label toggle
     const btn = document.getElementById("langToggle");
     if (btn) btn.textContent = lang === "en" ? "🇮🇳 ಕನ್ನಡ" : "🇬🇧 English";
