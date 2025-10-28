@@ -128,11 +128,44 @@
       padding-top:12px;
       border-top:1px solid rgba(107,66,38,.1);
     }
+    /* Floating action buttons */
+    .fab{
+      display:none; /* Hidden by default */
+      position:fixed;
+      right:18px;
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      color:#fff;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      cursor:pointer;
+      z-index:40;
+      transition:transform 0.2s;
+    }
+    .fab:hover{
+      transform:scale(1.05);
+    }
+    .fab-primary{
+      bottom:18px;
+      background:var(--accent);
+      box-shadow:0 8px 20px rgba(107,66,38,.18);
+    }
+    .fab-secondary{
+      bottom:90px;
+      background:var(--accent-2);
+      box-shadow:0 8px 20px rgba(164,107,57,.18);
+    }
+    .fab.loading{
+      padding:0;
+    }
+    .fab.copy-success{
+      background:var(--green);
+    }
+
     @media (max-width:720px){
       .grid{grid-template-columns:1fr}
-    }
-    @media (min-width:721px) and (max-width:980px){
-      .grid{grid-template-columns:1fr 1fr}
       .wrap{padding:14px}
       .logo{width:64px;height:64px}
       /* Mobile header layout */
@@ -145,41 +178,14 @@
       .price{font-size:38px}
       .card{padding:16px}
       footer{flex-direction:column;gap:8px;align-items:flex-start}
-      /* Floating action buttons */
+      /* Show FABs on mobile */
       .fab{
         display:flex;
-        position:fixed;
-        right:18px;
-        width:56px;
-        height:56px;
-        border-radius:50%;
-        color:#fff;
-        align-items:center;
-        justify-content:center;
-        border:none;
-        cursor:pointer;
-        z-index:40;
-        transition:transform 0.2s;
       }
-      .fab:hover{
-        transform:scale(1.05);
-      }
-      .fab-primary{
-        bottom:18px;
-        background:var(--accent);
-        box-shadow:0 8px 20px rgba(107,66,38,.18);
-      }
-      .fab-secondary{
-        bottom:90px;
-        background:var(--accent-2);
-        box-shadow:0 8px 20px rgba(164,107,57,.18);
-      }
-      .fab.loading{
-        padding:0;
-      }
-      .fab.copy-success{
-        background:var(--green);
-      }
+    }
+    
+    @media (min-width:721px) and (max-width:980px){
+      .grid{grid-template-columns:1fr 1fr}
     }
     /* Notification banner styles */
     @keyframes scroll {
@@ -334,7 +340,9 @@
         // Update current prices
         updateUI('Arabica', latest.arabica, latest.date);
         updateUI('Robusta', latest.robusta, latest.date);
+        updateUI('Arecanut', latest.arecanut, latest.date);
         
+        // Update history - use the already sorted data
         // Update history - use the already sorted data
         updateHistory(sortedData);
       }catch(err){
@@ -388,6 +396,7 @@
     function showPlaceholder(){
       document.getElementById('arabicaPrice').textContent = '—';
       document.getElementById('robustaPrice').textContent = '—';
+      document.getElementById('arecanutPrice').textContent = '—';
     }
 
     // Button helpers
