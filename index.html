@@ -602,12 +602,30 @@ Mudigere | Chickmagaluru | Belur | Sakaleshpura·`
     const copyBtn = document.getElementById('copyMsg');
     
     function generatePriceMessage() {
+      const lang = document.documentElement.lang || "en";
       const arabicaPrice = document.getElementById('arabicaPrice').textContent.trim();
       const robustaPrice = document.getElementById('robustaPrice').textContent.trim();
       const arecanutPrice = document.getElementById('arecanutPrice').textContent.trim();
       const date = document.getElementById('arabicaTime').textContent.trim();
-      
-      return `Phalguni Coffee Trades
+
+  // Build message depending on language
+  const message = lang === "kn"
+    ? `☕ ಫಾಲ್ಗುಣಿ ಕಾಫಿ ಟ್ರೇಡ್ಸ್
+
+📅 ದಿನಾಂಕ: ${date}
+ಅರೇಬಿಕಾ ಕಾಫಿ (ಕಚ್ಚಾ): ${arabicaPrice}
+ರೋಬಸ್ಟಾ ಕಾಫಿ (ಕಚ್ಚಾ): ${robustaPrice}
+ಅಡಿಕೆ (ಕಚ್ಚಾ): ${arecanutPrice}
+
+⚠️ ಗಮನಿಸಿ: ಈ ದರಗಳು 90% ಅಥವಾ ಹೆಚ್ಚು ಹಣ್ಣುಗಳಿರುವ ಕಾಫಿಗೆ ಮಾತ್ರ ಅನ್ವಯಿಸುತ್ತವೆ.
+ಕಡಿಮೆ ಹಣ್ಣುಗಳಿರುವ ಕಾಫಿಗೆ ದರಗಳು ಬದಲಾಗಬಹುದು.
+
+📞 ಸಂಪರ್ಕಿಸಿ:
+ಸಮಂತ್ ಬಿ ಪಿ: +91 8277446831
+ಶಶ್ವತ್ ಎಂ ಆರ್: +91 9902440431
+
+📍 ಸ್ಥಳ: ಮೂಡಿಗೆರೆ | ಚಿಕ್ಕಮಗಳೂರು | ಬೆಳೂರು | ಸಾಕಲೇಶಪುರ ಸುತ್ತಮುತ್ತ ಪ್ರದೇಶಗಳು`
+    : `Phalguni Coffee Trades
 
 Date: ${date}
 Arabica Raw Coffee: ${arabicaPrice}
