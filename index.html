@@ -68,7 +68,7 @@
       font-size: 15px;
       letter-spacing: 0.2px;
     }
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:18px}
     .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 10px 30px rgba(98,68,44,.06);min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
     .type{font-size:13px;color:var(--muted);letter-spacing:0.6px}
     .price{font-weight:800;font-size:34px;color:var(--accent)}
@@ -130,6 +130,9 @@
     }
     @media (max-width:720px){
       .grid{grid-template-columns:1fr}
+    }
+    @media (min-width:721px) and (max-width:980px){
+      .grid{grid-template-columns:1fr 1fr}
       .wrap{padding:14px}
       .logo{width:64px;height:64px}
       /* Mobile header layout */
@@ -211,7 +214,7 @@
 </head>
 <body>
   <div class="notification-banner">
-    <div class="notification-text">⚠️ Important: These rates are applicable for coffee with 90% or more fruities. Rates may vary for coffee with less than 90% fruities. ⚠️</div>
+    <div class="notification-text">⚠️ Important: These rates are applicable for coffee with 90% or more fruits. Rates may vary for coffee with less than 90% fruits. ⚠️</div>
   </div>
   <div class="wrap" style="margin-top: 50px">
     <header>
@@ -244,12 +247,20 @@
           </div>
           <div class="meta">Last updated: <span id="robustaTime">—</span></div>
         </div>
+
+        <div class="card" id="arecanutCard">
+          <div>
+            <div class="type">Arecanut — Raw (per kg)</div>
+            <div class="price" id="arecanutPrice">—</div>
+          </div>
+          <div class="meta">Last updated: <span id="arecanutTime">—</span></div>
+        </div>
       </div>
 
       <h2>Price History (Past 7 Days)</h2>
       <table id="historyTable">
         <thead>
-          <tr><th>Date</th><th>Arabica (₹/kg)</th><th>Robusta (₹/kg)</th></tr>
+          <tr><th>Date</th><th>Arabica (₹/kg)</th><th>Robusta (₹/kg)</th><th>Arecanut (₹/kg)</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -286,7 +297,11 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS9DnNnxDj2n3Fy9-JVnnouxDoZ_VZ9au3wRXNO_s0CYLED7mGHPfpolUAhNCpNyeAvMJYD7kGXBl_K/pub?gid=0&single=true&output=csv";
-    const priceMap = { Arabica: {priceEl: 'arabicaPrice', timeEl: 'arabicaTime'}, Robusta: {priceEl: 'robustaPrice', timeEl: 'robustaTime'} };
+    const priceMap = { 
+      Arabica: {priceEl: 'arabicaPrice', timeEl: 'arabicaTime'}, 
+      Robusta: {priceEl: 'robustaPrice', timeEl: 'robustaTime'},
+      Arecanut: {priceEl: 'arecanutPrice', timeEl: 'arecanutTime'}
+    };
 
     async function fetchPrices(){
       try{
@@ -307,7 +322,8 @@
         const sortedData = dataRows.map(row => ({
           date: row[0],
           arabica: row[1],
-          robusta: row[2].replace('\r', ''),
+          robusta: row[2],
+          arecanut: row[3] ? row[3].replace('\r', '') : '—',
           timestamp: new Date(row[0]).getTime()
         }))
         .sort((a, b) => b.timestamp - a.timestamp); // Sort newest to oldest
@@ -339,17 +355,18 @@
     function updateHistory(data){
       const tbody = document.querySelector('#historyTable tbody');
       tbody.innerHTML = '';
-      const labels = [], arabicaArr = [], robustaArr = [];
+      const labels = [], arabicaArr = [], robustaArr = [], arecanutArr = [];
       // Reverse the data array to show older dates first (left to right)
       const reversedData = [...data].reverse();
       
       reversedData.forEach(d=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.date}</td><td>₹ ${d.arabica}</td><td>₹ ${d.robusta}</td>`;
+        tr.innerHTML = `<td>${d.date}</td><td>₹ ${d.arabica}</td><td>₹ ${d.robusta}</td><td>₹ ${d.arecanut}</td>`;
         tbody.appendChild(tr);
         labels.push(d.date);
         arabicaArr.push(Number(d.arabica));
         robustaArr.push(Number(d.robusta));
+        arecanutArr.push(d.arecanut === '—' ? null : Number(d.arecanut));
       });
       // chart
       const ctx = document.getElementById('historyChart').getContext('2d');
@@ -360,7 +377,8 @@
           labels: labels,
           datasets: [
             {label:'Arabica', data: arabicaArr, borderColor:'#6b4226', backgroundColor:'rgba(107,66,38,0.2)', tension:0.3},
-            {label:'Robusta', data: robustaArr, borderColor:'#557a46', backgroundColor:'rgba(85,122,70,0.2)', tension:0.3}
+            {label:'Robusta', data: robustaArr, borderColor:'#557a46', backgroundColor:'rgba(85,122,70,0.2)', tension:0.3},
+            {label:'Arecanut', data: arecanutArr, borderColor:'#d4af37', backgroundColor:'rgba(212,175,55,0.2)', tension:0.3}
           ]
         },
         options:{responsive:true,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:false}}}
@@ -450,6 +468,7 @@
     function generatePriceMessage() {
       const arabicaPrice = document.getElementById('arabicaPrice').textContent.trim();
       const robustaPrice = document.getElementById('robustaPrice').textContent.trim();
+      const arecanutPrice = document.getElementById('arecanutPrice').textContent.trim();
       const date = document.getElementById('arabicaTime').textContent.trim();
       
       return `Phalguni Coffee Trades
@@ -457,9 +476,10 @@
 Date: ${date}
 Arabica Raw Coffee: ${arabicaPrice}
 Robusta Raw Coffee: ${robustaPrice}
+Arecanut Raw: ${arecanutPrice}
 
-⚠️ Note: These rates are applicable for coffee with 90% or more fruities.
-Rates may vary for coffee with less than 90% fruities.
+⚠️ Note: These rates are applicable for coffee with 90% or more fruits.
+Rates may vary for coffee with less than 90% fruits.
 
 Contact Details:
 Samanth B P: +91 8277446831
