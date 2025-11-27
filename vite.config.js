@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: '/phalguni-coffee-trades/',
   build: {
     outDir: 'docs'
   }
