@@ -6,7 +6,6 @@ import Header from './components/Header';
 import NotificationBanner from './components/NotificationBanner';
 import PriceCard from './components/PriceCard';
 import PriceHistory from './components/PriceHistory';
-import PriceForm from './components/PriceForm';
 import ContactCard from './components/ContactCard';
 import Footer from './components/Footer';
 import FloatingButtons from './components/FloatingButtons';
@@ -92,12 +91,6 @@ export default function App() {
             data={priceData.history}
             lang={lang}
             translations={translations}
-          />
-
-          <PriceForm 
-            lang={lang}
-            onSuccess={handleFetchPrices}
-            onError={(err) => setError(err.message)}
           />
 
           <ContactCard lang={lang} />
