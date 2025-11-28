@@ -1,9 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "docs",
-  "env": {
-    "GOOGLE_SHEETS_CREDENTIALS": "@google_sheets_credentials",
-    "SHEET_ID": "@sheet_id",
-    "VITE_ADMIN_PASSWORD": "@vite_admin_password"
-  }
+  "outputDirectory": "docs"
 }
