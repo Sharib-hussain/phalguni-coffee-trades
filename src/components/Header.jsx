@@ -2,7 +2,9 @@ import { translations } from '../utils/translations';
 
 export default function Header({ lang, onLangToggle }) {
   const handleAdminClick = () => {
-    window.location.hash = '#/admin';
+    // Use the base path from vite config
+    const basePath = import.meta.env.BASE_URL || '/phalguni-coffee-trades/';
+    window.location.href = basePath + '#/admin';
   };
 
   return (
