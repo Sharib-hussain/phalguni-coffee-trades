@@ -1,6 +1,10 @@
 import { translations } from '../utils/translations';
 
 export default function Header({ lang, onLangToggle }) {
+  const handleAdminClick = () => {
+    window.location.hash = '#/admin';
+  };
+
   return (
     <header>
       <div className="header-top">
@@ -12,6 +16,14 @@ export default function Header({ lang, onLangToggle }) {
             onClick={onLangToggle}
           >
             {lang === 'en' ? '🇮🇳 ಕನ್ನಡ' : '🇬🇧 English'}
+          </button>
+          <button 
+            id="adminBtn" 
+            className="btn btn-admin"
+            onClick={handleAdminClick}
+            title="Admin Panel"
+          >
+            ⚙️ Admin
           </button>
         </div>
       </div>

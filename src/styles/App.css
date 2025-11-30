@@ -142,6 +142,16 @@ p.lead {
   background: var(--accent-2);
 }
 
+.btn.btn-admin {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 13px;
+  padding: 9px 12px;
+}
+
+.btn.btn-admin:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 .btn .icon {
   font-size: 16px;
 }
