@@ -9,8 +9,10 @@ import PriceHistory from './components/PriceHistory';
 import ContactCard from './components/ContactCard';
 import Footer from './components/Footer';
 import FloatingButtons from './components/FloatingButtons';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState('home');
   const [lang, setLang] = useState(() => {
     const userLang = navigator.language.startsWith('kn') ? 'kn' : 'en';
     return userLang;
@@ -27,6 +29,21 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
+
+  // Check for admin route
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (window.location.hash === '#/admin') {
+        setCurrentPage('admin');
+      } else {
+        setCurrentPage('home');
+      }
+    };
+
+    handleRouteChange();
+    window.addEventListener('hashchange', handleRouteChange);
+    return () => window.removeEventListener('hashchange', handleRouteChange);
+  }, []);
 
   const handleFetchPrices = async () => {
     setIsLoading(true);
@@ -52,6 +69,10 @@ export default function App() {
     arecanut: '—',
     date: '—'
   };
+
+  if (currentPage === 'admin') {
+    return <AdminPanel />;
+  }
 
   return (
     <>
